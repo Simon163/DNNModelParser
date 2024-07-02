@@ -30,6 +30,7 @@ python onnxModelParser.py -i ${modelName} -om -ol 2
 python onnxModelParser.py -i ${modelName} -om -ol 3
 python onnxModelParser.py -i ${modelName} -si
 python onnxModelParser.py -i ${modelName} -ir '[3, 320, 320]'
+python onnxModelParser.py -i ${modelName} -w
 
 #deactivate the conda virtual environment: onnx
 conda deactivate

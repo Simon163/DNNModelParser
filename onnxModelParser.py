@@ -512,6 +512,42 @@ class OnnxModelParser(IModelParser):
             op_info["Activate_Mode"] = layer_Type
         return op_info
 
+    def write(self):
+        """
+        write the detail information of the model to an excel file
+        """
+        from openpyxl import Workbook
+
+        work_book = Workbook()
+        print("*" * 20 + "original model" + "*" * 20)
+        op_num = len(self.node)
+        for idx in range(op_num):
+            op_info = self._get_empty_op_info()
+            op = self.node[idx]
+            op_info = self._get_op_info(idx, op, op_info)
+            self.ops_info.append(op_info)
+        self._write_excel(self.output_xlsx_name, work_book, "original")
+        print(
+            "the detail information of the original model has been written to "
+            + self.output_xlsx_name + " in sheet 'original'")
+
+        print("*" * 20 + "optimized model" + "*" * 20)
+        IModelParser.__init__(self)
+        # optimize model
+        self.optimize_model()
+        # initilize model
+        self.__parse()
+        op_num = len(self.node)
+        for idx in range(op_num):
+            op_info = self._get_empty_op_info()
+            op = self.node[idx]
+            op_info = self._get_op_info(idx, op, op_info)
+            self.ops_info.append(op_info)
+        self._write_excel(self.output_xlsx_name, work_book, "optimized")
+        print(
+            "the detail information of the optimized model has been written to "
+            + self.output_xlsx_name + " in sheet 'optimized'")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -536,7 +572,7 @@ if __name__ == "__main__":
         "--print",
         action='store_true',
         default=False,
-        help="print model infomation, 0: disabled, 1: enabled, default: 0")
+        help="print model information, 0: disabled, 1: enabled, default: 0")
     parser.add_argument(
         "-gi",
         "--get_inputs",
@@ -607,6 +643,15 @@ if __name__ == "__main__":
         help=
         "modify input shape of input layer, input shape must be specified using a list with 3 dimensions like [3,224,224]"
     )
+    parser.add_argument(
+        "-w",
+        "--write",
+        action='store_true',
+        default=False,
+        help=
+        "write the detail model information of pre graph optimization and post graph optimization \
+        to an excel file, 0: disabled, 1: enabled, default: 0")
+
     args = parser.parse_args()
     print("input arguments: ", args)
 
@@ -620,9 +665,9 @@ if __name__ == "__main__":
         debugpy.wait_for_client()
 
     if args.print:
-        print("print model infomation...")
+        print("print model information...")
         model_parser.print_model()
-        print("print model infomation, succeeded")
+        print("print model information, succeeded")
 
     if args.get_inputs:
         print("get the names and shapes of inputs...")
@@ -728,3 +773,12 @@ if __name__ == "__main__":
 
         else:
             print("modify input shape of input layer, succeeded!")
+
+    if args.write:
+        print(
+            "write the model information of pre graph optimization and post graph optimization to an excel file.."
+        )
+        model_parser.write()
+        print(
+            "write the model information of pre graph optimization and post graph optimization to an excel file, succeeded"
+        )
