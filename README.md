@@ -1,7 +1,7 @@
 
 
 
-The repo uses Python to implement the parsing of DNN (Deep Neural Network) models, supporting the pre-trained models from the current popular frameworks: ONNX, Caffe, and TensorFlow.  For Pytorch models, we can use [Pytorch's ONNX exporter](https://pytorch.org/tutorials/advanced/super_resolution_with_onnxruntime.html) to convert a Pytorch model to the ONNX model first, then use the ONNX model parser scripts in this repo to parse the corresponding ONNX model. 
+The repo uses Python to implement the parsing of DNN (Deep Neural Network) models, supporting the pre-trained models from the current popular frameworks: ONNX, Pytorch, Caffe, and TensorFlow.  
 
 After parsing,  the detailed information of each layer is stored in an Excel file, consisting of three categories of analysis:
 1. network structure analysis, including the following information:
@@ -62,3 +62,17 @@ The -d option is used for debugging the scripting script only inside VSCode.
 ```
 python onnxModelParser.py -d
 ```
+
+# Pytorch
+
+So far now, this repo supports the following functionality:
+1. print the model info details
+2. convert the Pytorch model to ONNX model
+3. list models available in a give PyTorch Hub repository, such as pytorch/vision, ultralytics/yolov5
+4. load a model from a given PyTorch Hub repository and save it
+5. perform inference based on the given input data
+6. print and save a summary of the Pytorch model and save it in the .txt file. For example, [resnet18_summary.txt](demo/resnet18_summary.txt)
+7. visualize the given model and save the model graph in the .png file. For example, visualize the resnet18: 
+![Alt](demo/resnet18.png)
+
+
