@@ -72,7 +72,13 @@ So far now, this repo supports the following functionality:
 4. load a model from a given PyTorch Hub repository and save it
 5. perform inference based on the given input data
 6. print and save a summary of the Pytorch model and save it in the .txt file. For example, [resnet18_summary.txt](demo/resnet18_summary.txt)
-7. visualize the given model and save the model graph in the .png file. For example, visualize the resnet18: 
-![Alt](demo/resnet18.png)
+7. visualize the given model and save the model graph in the .png file. For example, visualize the [resnet18.png](demo/resnet18.png)
+8. parse custom models, follow the steps below:
+   
+   step 1: place your custom model in the demo directory, such as [myCustomPytorchModel.py](demo/myCustomPytorchModel.py)
+   
+   step 2: create an instance of your custom model and pass it to the class PytorchModelParser as an argument
+   
+   step 3: call the methods of class PytorchModelParser to print, visualize, summary your custom model
 
 
