@@ -1,5 +1,3 @@
-from IModelParser import IModelParser
-
 import os
 import sys
 import torch
@@ -7,6 +5,9 @@ import torchvision
 import torchview
 import torchinfo
 import graphviz
+
+from IModelParser import IModelParser
+from demo import myCustomPytorchModel
 
 
 class PytorchModelParser(IModelParser):
@@ -19,25 +20,32 @@ class PytorchModelParser(IModelParser):
 
         torch.backends.nnpack.enabled = False
 
-        self.input_model = input_model
-        print("input model: ", self.input_model)
-        if not os.path.exists(self.input_model):
-            print("error: the input model {} doesn't exists!".format(
-                self.input_model))
-            sys.exit(1)
-
-        if not self.input_model.endswith('.pt'):
-            print(
-                "error: the input model is not a valid Pytorch model!".format(
+        if isinstance(input_model, str):
+            self.input_model = input_model
+            print("input model: ", self.input_model)
+            if not os.path.exists(self.input_model):
+                print("error: the input model {} doesn't exists!".format(
                     self.input_model))
-            sys.exit(1)
+                sys.exit(1)
 
-        model_path, model_name = os.path.split(self.input_model)
-        model_name, _ = os.path.splitext(model_name)
-        self.model_name = model_name
-        self.model_path = model_path
+            if not self.input_model.endswith('.pt'):
+                print("error: the input model is not a valid Pytorch model!".
+                      format(self.input_model))
+                sys.exit(1)
 
-        self.model = torch.load(self.input_model)
+            model_path, model_name = os.path.split(self.input_model)
+            model_name, _ = os.path.splitext(model_name)
+            self.model_name = model_name
+            self.model_path = model_path
+            self.model = torch.load(self.input_model)
+        elif isinstance(input_model, torch.nn.Module):
+            self.model = input_model
+            self.model_name = input_model.__class__.__name__.lower()
+            self.model_path = os.path.dirname(myCustomPytorchModel.__file__)
+            print(
+                f"custom, model name: {self.model_name}, model path: {self.model_path}"
+            )
+
         self.model.eval()
 
     def print_model_details(self):
@@ -68,7 +76,8 @@ class PytorchModelParser(IModelParser):
         output_names = ['output']
         torch.onnx.export(self.model,
                           dummy_input,
-                          self.model_name + ".onnx",
+                          os.path.join(self.model_path,
+                                       self.model_name + ".onnx"),
                           input_names=input_names,
                           output_names=output_names)
 
@@ -175,4 +184,26 @@ if __name__ == "__main__":
 
     # print and save model summary
     input_size = (3, 224, 224)
+    model_parser.print_model_summary(input_size)
+
+    # Initialize model parser with a custom PyTorch model
+    my_model = myCustomPytorchModel.MyCustomModel()
+    model_parser = PytorchModelParser(my_model)
+    # print model details
+    model_parser.print_model_details()
+
+    # convert pytorch model to onnx model
+    input_data = torch.randn(1, 100)
+    model_parser.export_to_onnx(input_data)
+
+    # visualize model and save the model graph in .png file
+    model_parser.visualize_model(input_size=(1, 100))
+
+    # predict
+    input_data = torch.randn((1, 100))
+    output = model_parser.predict(input_data)
+    print(output.size())
+
+    # print and save model summary
+    input_size = (1, 100)
     model_parser.print_model_summary(input_size)
